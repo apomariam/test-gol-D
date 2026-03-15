@@ -1,0 +1,1539 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ketsueki-gata Personality Test</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&amp;family=Rajdhani:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+  :root {
+    --cyan: #00f0ff;
+    --violet: #a855f7;
+    --bg-dark: #0a0a0f;
+    --surface: #12121a;
+    --text-col: #e0e0f0;
+  }
+
+  html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-col);
+  }
+
+  /* Circuit grid background */
+  .circuit-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px),
+      linear-gradient(rgba(168,85,247,0.02) 2px, transparent 2px),
+      linear-gradient(90deg, rgba(168,85,247,0.02) 2px, transparent 2px);
+    background-size: 40px 40px, 40px 40px, 120px 120px, 120px 120px;
+    animation: gridPulse 8s ease-in-out infinite;
+  }
+
+  @keyframes gridPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  /* Circuit traces */
+  .circuit-traces {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .trace {
+    position: absolute;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    height: 1px;
+    opacity: 0.15;
+    animation: traceScan 6s linear infinite;
+  }
+  .trace:nth-child(1) { top: 15%; width: 40%; left: -10%; animation-delay: 0s; }
+  .trace:nth-child(2) { top: 35%; width: 55%; left: 20%; animation-delay: 1.5s; background: linear-gradient(90deg, transparent, var(--violet), transparent); }
+  .trace:nth-child(3) { top: 60%; width: 35%; left: 50%; animation-delay: 3s; }
+  .trace:nth-child(4) { top: 80%; width: 60%; left: -5%; animation-delay: 4.5s; background: linear-gradient(90deg, transparent, var(--violet), transparent); }
+  .trace-v {
+    position: absolute;
+    background: linear-gradient(transparent, var(--cyan), transparent);
+    width: 1px;
+    opacity: 0.1;
+    animation: traceVScan 8s linear infinite;
+  }
+  .trace-v:nth-child(5) { left: 20%; height: 40%; top: -10%; animation-delay: 1s; }
+  .trace-v:nth-child(6) { left: 50%; height: 50%; top: 30%; animation-delay: 3s; background: linear-gradient(transparent, var(--violet), transparent); }
+  .trace-v:nth-child(7) { left: 80%; height: 35%; top: 10%; animation-delay: 5s; }
+
+  @keyframes traceScan {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+  }
+  @keyframes traceVScan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(300%); }
+  }
+
+  /* Brain container */
+  .brain-container {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    animation: brainFloat 6s ease-in-out infinite;
+  }
+  @keyframes brainFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .brain-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 30px rgba(0,240,255,0.3)) drop-shadow(0 0 60px rgba(168,85,247,0.2));
+    animation: brainRotate 20s linear infinite;
+  }
+  @keyframes brainRotate {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(360deg); }
+  }
+
+  /* Synapse pulses */
+  .synapse {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan), 0 0 16px var(--cyan);
+    animation: synapsePulse 2s ease-in-out infinite;
+  }
+  @keyframes synapsePulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.5); }
+  }
+
+  /* Panel glow */
+  .panel {
+    background: rgba(18,18,26,0.85);
+    border: 1px solid rgba(0,240,255,0.15);
+    backdrop-filter: blur(12px);
+    transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+    overflow: hidden;
+  }
+  .panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,240,255,0.05), transparent 50%, rgba(168,85,247,0.05));
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .panel:hover::before { opacity: 1; }
+  .panel:hover {
+    border-color: rgba(0,240,255,0.4);
+    box-shadow: 0 0 20px rgba(0,240,255,0.1), 0 0 40px rgba(168,85,247,0.05), inset 0 0 20px rgba(0,240,255,0.03);
+    transform: translateY(-2px);
+  }
+
+  /* Blood type crystal */
+  .crystal {
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+  .crystal-inner {
+    width: 100%;
+    height: 100%;
+    animation: crystalSpin 10s linear infinite;
+    filter: drop-shadow(0 0 15px rgba(0,240,255,0.4));
+  }
+  @keyframes crystalSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .crystal-refract {
+    position: absolute;
+    inset: 0;
+    animation: refract 3s ease-in-out infinite;
+  }
+  @keyframes refract {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+
+  /* Scorpio constellation */
+  .star {
+    fill: var(--violet);
+    filter: drop-shadow(0 0 4px var(--violet));
+    animation: starTwinkle 3s ease-in-out infinite;
+  }
+  .star-line {
+    stroke: var(--violet);
+    stroke-width: 1;
+    opacity: 0.5;
+    stroke-dasharray: 4 2;
+    animation: lineFlow 4s linear infinite;
+  }
+  @keyframes starTwinkle {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+  @keyframes lineFlow {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -24; }
+  }
+
+  /* Radar chart */
+  .radar-axis { stroke: rgba(0,240,255,0.15); stroke-width: 0.5; }
+  .radar-ring { stroke: rgba(0,240,255,0.1); fill: none; stroke-width: 0.5; }
+  .radar-area {
+    fill: rgba(0,240,255,0.1);
+    stroke: var(--cyan);
+    stroke-width: 1.5;
+    filter: drop-shadow(0 0 6px rgba(0,240,255,0.3));
+    animation: radarPulse 4s ease-in-out infinite;
+  }
+  @keyframes radarPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+  .radar-dot {
+    fill: var(--cyan);
+    filter: drop-shadow(0 0 4px var(--cyan));
+  }
+
+  /* Rorschach */
+  .rorschach-container {
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .rorschach-container:hover {
+    transform: scale(1.15);
+  }
+  .rorschach-svg {
+    filter: drop-shadow(0 0 10px rgba(168,85,247,0.3));
+    animation: rorschachBreath 5s ease-in-out infinite;
+  }
+  @keyframes rorschachBreath {
+    0%, 100% { opacity: 0.7; filter: drop-shadow(0 0 10px rgba(168,85,247,0.3)); }
+    50% { opacity: 1; filter: drop-shadow(0 0 20px rgba(168,85,247,0.5)); }
+  }
+
+  /* Rorschach tooltip */
+  .rorschach-tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(5px);
+    background: rgba(18,18,26,0.95);
+    border: 1px solid rgba(168,85,247,0.4);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    width: 200px;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    z-index: 50;
+    box-shadow: 0 0 20px rgba(168,85,247,0.15);
+  }
+  .rorschach-container:hover .rorschach-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Radar tooltip */
+  .radar-tooltip {
+    position: absolute;
+    background: rgba(18,18,26,0.95);
+    border: 1px solid rgba(0,240,255,0.4);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    width: 180px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    z-index: 50;
+    box-shadow: 0 0 15px rgba(0,240,255,0.1);
+  }
+  .radar-tooltip.visible {
+    opacity: 1;
+  }
+
+  /* Glow text */
+  .glow-cyan {
+    color: var(--cyan);
+    text-shadow: 0 0 10px rgba(0,240,255,0.5), 0 0 20px rgba(0,240,255,0.3);
+  }
+  .glow-violet {
+    color: var(--violet);
+    text-shadow: 0 0 10px rgba(168,85,247,0.5), 0 0 20px rgba(168,85,247,0.3);
+  }
+
+  /* Scan line */
+  .scanline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.1;
+    z-index: 100;
+    animation: scanDown 8s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes scanDown {
+    0% { top: -2px; }
+    100% { top: 100%; }
+  }
+
+  /* Title animation */
+  .title-glow {
+    animation: titlePulse 4s ease-in-out infinite;
+  }
+  @keyframes titlePulse {
+    0%, 100% { text-shadow: 0 0 10px rgba(0,240,255,0.3), 0 0 30px rgba(0,240,255,0.1); }
+    50% { text-shadow: 0 0 20px rgba(0,240,255,0.6), 0 0 50px rgba(0,240,255,0.3), 0 0 80px rgba(168,85,247,0.1); }
+  }
+
+  /* Staggered entrance */
+  .fade-in { opacity: 0; animation: fadeSlideIn 0.8s ease-out forwards; }
+  .fade-in-1 { animation-delay: 0.1s; }
+  .fade-in-2 { animation-delay: 0.3s; }
+  .fade-in-3 { animation-delay: 0.5s; }
+  .fade-in-4 { animation-delay: 0.7s; }
+  .fade-in-5 { animation-delay: 0.9s; }
+  @keyframes fadeSlideIn {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scroll for smaller screens */
+  .dashboard-scroll {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,240,255,0.3) transparent;
+  }
+  .dashboard-scroll::-webkit-scrollbar { width: 4px; }
+  .dashboard-scroll::-webkit-scrollbar-track { background: transparent; }
+  .dashboard-scroll::-webkit-scrollbar-thumb { background: rgba(0,240,255,0.3); border-radius: 2px; }
+
+  /* HUD corners */
+  .hud-corner {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    opacity: 0.5;
+  }
+  .hud-corner::before, .hud-corner::after {
+    content: '';
+    position: absolute;
+    background: var(--cyan);
+  }
+  .hud-tl::before { top: 0; left: 0; width: 12px; height: 1px; }
+  .hud-tl::after { top: 0; left: 0; width: 1px; height: 12px; }
+  .hud-tr::before { top: 0; right: 0; width: 12px; height: 1px; }
+  .hud-tr::after { top: 0; right: 0; width: 1px; height: 12px; }
+  .hud-bl::before { bottom: 0; left: 0; width: 12px; height: 1px; }
+  .hud-bl::after { bottom: 0; left: 0; width: 1px; height: 12px; }
+  .hud-br::before { bottom: 0; right: 0; width: 12px; height: 1px; }
+  .hud-br::after { bottom: 0; right: 0; width: 1px; height: 12px; }
+
+  /* Particle field */
+  .particle {
+    position: fixed;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Test screen */
+  .test-container {
+    min-height: 100%;
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: rgba(0, 240, 255, 0.2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    transition: width 0.5s ease;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+  }
+
+  .question-card {
+    background: rgba(18, 18, 26, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 40px 30px;
+    animation: slideIn 0.5s ease;
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--cyan);
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  }
+
+  .answers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .answer-card {
+    background: rgba(20, 20, 30, 0.6);
+    border: 1.5px solid rgba(0, 240, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .answer-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    border-color: rgba(0, 240, 255, 0.5);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.15), inset 0 0 20px rgba(0, 240, 255, 0.03);
+    background: rgba(20, 20, 30, 0.8);
+  }
+
+  .answer-card.selected {
+    border-color: var(--cyan);
+    background: rgba(0, 240, 255, 0.1);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.3), inset 0 0 20px rgba(0, 240, 255, 0.1);
+    animation: pulse 0.5s ease;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .answer-emoji {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .answer-text {
+    font-size: 14px;
+    color: #d0d0e0;
+    font-weight: 500;
+  }
+
+  .progress-text {
+    color: #888;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 2px;
+  }
+
+  /* Results screen */
+  .results-container {
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.8s ease;
+  }
+
+  .results-card {
+    background: rgba(18, 18, 26, 0.95);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 50px 40px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 0 50px rgba(0, 240, 255, 0.15);
+  }
+
+  .result-badge {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    border: 3px solid var(--cyan);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+    animation: badgePulse 2s ease-in-out infinite;
+  }
+
+  @keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .result-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--cyan);
+    text-align: center;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  }
+
+  .result-description {
+    color: #b0b0c0;
+    text-align: center;
+    margin-bottom: 30px;
+    line-height: 1.6;
+    font-size: 14px;
+  }
+
+  .scores-container {
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px solid rgba(0, 240, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+
+  .score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 14px;
+  }
+
+  .score-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .score-label {
+    font-weight: 600;
+    font-family: 'Orbitron', monospace;
+  }
+
+  .score-bar {
+    height: 6px;
+    background: rgba(0, 240, 255, 0.1);
+    border-radius: 3px;
+    flex: 1;
+    margin: 0 15px;
+    overflow: hidden;
+  }
+
+  .score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    border-radius: 3px;
+    transition: width 0.8s ease;
+  }
+
+  .score-value {
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    color: var(--cyan);
+    min-width: 35px;
+    text-align: right;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .btn-primary {
+    background: var(--cyan);
+    color: #0a0a0f;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 40px rgba(0, 240, 255, 0.5);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1.5px solid var(--cyan);
+    color: var(--cyan);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(0, 240, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+  }
+
+  .btn-next {
+    background: var(--violet);
+    color: white;
+    margin-top: 20px;
+    width: 100%;
+    opacity: 0.5;
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-next.active {
+    opacity: 1;
+    pointer-events: all;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  }
+
+  .btn-next.active:hover {
+    box-shadow: 0 0 40px rgba(168, 85, 247, 0.5);
+    transform: translateY(-2px);
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(0, 240, 255, 0.2);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .intro-content {
+    text-align: center;
+  }
+
+  .intro-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--cyan);
+    margin-bottom: 15px;
+    text-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+  }
+
+  .intro-subtitle {
+    font-size: 18px;
+    color: var(--violet);
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+  }
+
+  .intro-description {
+    color: #a0a0b0;
+    margin-bottom: 30px;
+    line-height: 1.8;
+    font-size: 14px;
+  }
+
+  .packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 30px;
+  }
+
+  .package-item {
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    font-size: 12px;
+    font-family: 'Orbitron', monospace;
+    color: #b0b0c0;
+  }
+
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div class="circuit-bg"></div>
+  <div class="circuit-traces">
+   <div class="trace"></div>
+   <div class="trace"></div>
+   <div class="trace"></div>
+   <div class="trace"></div>
+   <div class="trace-v"></div>
+   <div class="trace-v"></div>
+   <div class="trace-v"></div>
+  </div>
+  <div class="scanline"></div>
+  <div id="particles"></div>
+  <main id="mainContent" class="dashboard-scroll h-full" style="position: relative; z-index: 1;"><!-- Content will be rendered here -->
+  </main>
+  <script>
+// Test questions database
+const testQuestions = [
+  // Paket 1: Observasi Perilaku Sehari-hari (Q1-10)
+  {
+    package: 1,
+    question: "Dalam situasi sosial baru, saya cenderung:",
+    answers: [
+      { text: "Mendengarkan terlebih dahulu, kemudian berbicara", emoji: "👂", type: "A", weight: 1 },
+      { text: "Langsung memulai percakapan dengan energi tinggi", emoji: "🎤", type: "B", weight: 1 },
+      { text: "Fleksibel, tergantung suasana hati saat itu", emoji: "🌊", type: "O", weight: 1 },
+      { text: "Mengamati sambil berpikir sebelum bertindak", emoji: "🧠", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 1,
+    question: "Saat menghadapi tugas yang sulit, respons saya adalah:",
+    answers: [
+      { text: "Mengikuti prosedur yang sudah terbukti efektif", emoji: "✅", type: "A", weight: 1 },
+      { text: "Mencoba cara baru yang belum pernah dilakukan", emoji: "⚡", type: "B", weight: 1 },
+      { text: "Melihat situasi dan menyesuaikan pendekatan", emoji: "🎯", type: "O", weight: 1 },
+      { text: "Menganalisis berbagai perspektif sebelum memutuskan", emoji: "🔍", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 1,
+    question: "Gaya komunikasi saya dengan orang lain cenderung:",
+    answers: [
+      { text: "Formal dan terstruktur dengan jelas", emoji: "📋", type: "A", weight: 1 },
+      { text: "Spontan dan ekspresif dengan banyak gestur", emoji: "🎭", type: "B", weight: 1 },
+      { text: "Santai dan menyesuaikan dengan orang lain", emoji: "😊", type: "O", weight: 1 },
+      { text: "Mendalam dan penuh nuansa, sering bertanya", emoji: "💭", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 1,
+    question: "Ketika membuat rencana, saya biasanya:",
+    answers: [
+      { text: "Membuat detail terperinci dan mengikutinya ketat", emoji: "📅", type: "A", weight: 1 },
+      { text: "Membuat rencana umum dan improvisasi saat berjalan", emoji: "🚀", type: "B", weight: 1 },
+      { text: "Fleksibel, berubah sesuai kondisi", emoji: "🔄", type: "O", weight: 1 },
+      { text: "Merencanakan dengan mempertimbangkan berbagai skenario", emoji: "🗺️", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 1,
+    question: "Ruang kerja/rumah ideal saya adalah:",
+    answers: [
+      { text: "Rapi, terorganisir, dan minimalis", emoji: "🏠", type: "A", weight: 1 },
+      { text: "Penuh warna, kreatif, dan dinamis", emoji: "🎨", type: "B", weight: 1 },
+      { text: "Nyaman dan bisa berkembang sesuai kebutuhan", emoji: "☁️", type: "O", weight: 1 },
+      { text: "Dengan banyak buku, inspirasi, dan ruang refleksi", emoji: "📚", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 1,
+    question: "Saat mengambil keputusan penting, saya sangat mempertimbangkan:",
+    answers: [
+      { text: "Fakta konkret dan data yang jelas", emoji: "📊", type: "A", weight: 1 },
+      { text: "Intuisi dan perasaan mendalam", emoji: "✨", type: "B", weight: 1 },
+      { text: "Dampak praktis bagi semua orang terlibat", emoji: "🤝", type: "O", weight: 1 },
+      { text: "Implikasi jangka panjang dan prinsip universal", emoji: "🌍", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 1,
+    question: "Hubungan saya dengan rutinitas harian adalah:",
+    answers: [
+      { text: "Mencintai rutinitas, itu memberi ketenangan", emoji: "⏰", type: "A", weight: 1 },
+      { text: "Merasa bosan dengan rutinitas, ingin variasi", emoji: "🌀", type: "B", weight: 1 },
+      { text: "Tidak terlalu peduli, asal efisien", emoji: "💨", type: "O", weight: 1 },
+      { text: "Rutinitas harus punya makna dan tujuan", emoji: "🎯", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 1,
+    question: "Ketika menghadapi kritik, saya cenderung:",
+    answers: [
+      { text: "Menerima dengan logis dan mencari solusi", emoji: "👍", type: "A", weight: 1 },
+      { text: "Merasakan secara emosional tapi cepat move on", emoji: "💪", type: "B", weight: 1 },
+      { text: "Mempertimbangkan dengan terbuka pikiran", emoji: "🤔", type: "O", weight: 1 },
+      { text: "Menganalisis mendalam untuk pembelajaran pribadi", emoji: "📖", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 1,
+    question: "Waktu luang saya paling sering digunakan untuk:",
+    answers: [
+      { text: "Aktivitas terstruktur dan produktif", emoji: "🏃", type: "A", weight: 1 },
+      { text: "Petualangan spontan dan pengalaman baru", emoji: "🎢", type: "B", weight: 1 },
+      { text: "Bersantai dan menikmati momen sederhana", emoji: "🌴", type: "O", weight: 1 },
+      { text: "Membaca, belajar, atau introspeksi diri", emoji: "🔮", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 1,
+    question: "Dalam kelompok, peran saya cenderung adalah:",
+    answers: [
+      { text: "Organizer yang membuat semuanya teratur", emoji: "📌", type: "A", weight: 1 },
+      { text: "Motivator yang membawa energi dan keseruan", emoji: "🎉", type: "B", weight: 1 },
+      { text: "Pelopor yang menjaga harmoni dan keseimbangan", emoji: "⚖️", type: "O", weight: 1 },
+      { text: "Pemikir strategis yang melihat gambaran besar", emoji: "♟️", type: "AB", weight: 1 }
+    ]
+  },
+  // Paket 2: Manajemen Emosi dan Stres (Q11-20)
+  {
+    package: 2,
+    question: "Ketika merasa stres, saya:",
+    answers: [
+      { text: "Fokus menyelesaikan masalah secara sistematis", emoji: "🔧", type: "A", weight: 1 },
+      { text: "Lepas steam melalui aktivitas fisik atau berbicara", emoji: "💨", type: "B", weight: 1 },
+      { text: "Mencari dukungan dari orang terdekat", emoji: "🤗", type: "O", weight: 1 },
+      { text: "Mundur sejenak untuk refleksi dan analisis", emoji: "🧘", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 2,
+    question: "Emosi saya secara umum adalah:",
+    answers: [
+      { text: "Stabil dan konsisten sepanjang waktu", emoji: "🌊", type: "A", weight: 1 },
+      { text: "Intens dan berfluktuasi dengan mudah", emoji: "🎢", type: "B", weight: 1 },
+      { text: "Adaptif, menyesuaikan dengan lingkungan", emoji: "🦎", type: "O", weight: 1 },
+      { text: "Kompleks, melibatkan banyak lapisan pemahaman", emoji: "🎨", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 2,
+    question: "Saat merasa marah, reaksi tipikal saya adalah:",
+    answers: [
+      { text: "Menarik diri dan menunggu sampai tenang", emoji: "❄️", type: "A", weight: 1 },
+      { text: "Mengungkapkan secara terang-terangan dan cepat berlalu", emoji: "⚡", type: "B", weight: 1 },
+      { text: "Mengomunikasikan apa yang mengganggu dengan santai", emoji: "💬", type: "O", weight: 1 },
+      { text: "Menganalisis akar masalah dengan kritis", emoji: "🔬", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 2,
+    question: "Hubungan saya dengan kegagalan adalah:",
+    answers: [
+      { text: "Melihat sebagai pelajaran untuk perbaikan", emoji: "📈", type: "A", weight: 1 },
+      { text: "Melihat sebagai tantangan untuk coba lagi", emoji: "🏔️", type: "B", weight: 1 },
+      { text: "Menerima dengan lapang dada dan move on", emoji: "😌", type: "O", weight: 1 },
+      { text: "Merefleksikan makna dan implikasi mendalam", emoji: "🤨", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 2,
+    question: "Ketika merasa tertekan, kebutuhan utama saya adalah:",
+    answers: [
+      { text: "Menyusun ulang prioritas dan membuat rencana", emoji: "📋", type: "A", weight: 1 },
+      { text: "Mencari aktivitas yang menyenangkan dan menghibur", emoji: "🎮", type: "B", weight: 1 },
+      { text: "Berbagi dengan teman atau keluarga dekat", emoji: "👥", type: "O", weight: 1 },
+      { text: "Solitude untuk memikirkan semuanya dengan jernih", emoji: "🌙", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 2,
+    question: "Kepercayaan diri saya umumnya:",
+    answers: [
+      { text: "Tinggi ketika siap dan terorganisir dengan baik", emoji: "💼", type: "A", weight: 1 },
+      { text: "Tinggi secara alami, cepat adapt dengan situasi", emoji: "😎", type: "B", weight: 1 },
+      { text: "Fleksibel, tergantung dukungan orang sekitar", emoji: "🤝", type: "O", weight: 1 },
+      { text: "Dibangun dari pemahaman mendalam tentang kemampuan diri", emoji: "🏆", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 2,
+    question: "Dalam situasi sosial yang menegangkan, saya biasanya:",
+    answers: [
+      { text: "Tetap profesional dan tenang", emoji: "🎩", type: "A", weight: 1 },
+      { text: "Mengalihkan dengan humor atau charm", emoji: "😄", type: "B", weight: 1 },
+      { text: "Berusaha membuat suasana lebih nyaman", emoji: "🕯️", type: "O", weight: 1 },
+      { text: "Observasi dan adaptasi secara halus", emoji: "🎭", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 2,
+    question: "Kemampuan saya mengelola ekspektasi orang lain adalah:",
+    answers: [
+      { text: "Sangat jelas dan konsisten dalam komunikasi", emoji: "📢", type: "A", weight: 1 },
+      { text: "Fleksibel dan menyesuaikan sesuai situasi", emoji: "🔄", type: "B", weight: 1 },
+      { text: "Berusaha menyeimbangkan ekspektasi berbeda", emoji: "⚖️", type: "O", weight: 1 },
+      { text: "Selektif, fokus pada hal yang benar-benar penting", emoji: "🎯", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 2,
+    question: "Saat menghadapi situasi tidak terduga, saya:",
+    answers: [
+      { text: "Shock sejenak, lalu buat rencana darurat", emoji: "🚨", type: "A", weight: 1 },
+      { text: "Langsung berganti gear dan hadapi dengan adrenalin", emoji: "⚡", type: "B", weight: 1 },
+      { text: "Mengalir dengan situasi sambil cari solusi", emoji: "🌊", type: "O", weight: 1 },
+      { text: "Pause, analisis, lalu ambil keputusan terukur", emoji: "⏸️", type: "AB", weight: 1 }
+    ]
+  },
+  // Paket 3: Dinamika Hubungan Sosial (Q21-30)
+  {
+    package: 3,
+    question: "Dalam persahabatan, saya cenderung memiliki:",
+    answers: [
+      { text: "Lingkaran teman kecil tapi dekat dan loyal", emoji: "👯", type: "A", weight: 1 },
+      { text: "Banyak teman dari berbagai latar belakang", emoji: "👥", type: "B", weight: 1 },
+      { text: "Teman yang fleksibel dan bisa berkembang", emoji: "🌱", type: "O", weight: 1 },
+      { text: "Teman yang bisa mendiskusikan hal mendalam", emoji: "💭", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 3,
+    question: "Saat ada konflik dengan teman, saya:",
+    answers: [
+      { text: "Langsung membicarakan dengan jelas dan tenang", emoji: "🗣️", type: "A", weight: 1 },
+      { text: "Mengekspresikan perasaan dengan emosi tinggi", emoji: "😤", type: "B", weight: 1 },
+      { text: "Berusaha memahami perspektif mereka terlebih dahulu", emoji: "👂", type: "O", weight: 1 },
+      { text: "Menganalisis akar masalah sebelum berbicara", emoji: "🔍", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 3,
+    question: "Dalam dinamika keluarga, peran saya adalah:",
+    answers: [
+      { text: "Anak / Keluarga yang bertanggung jawab dan dapat diandalkan", emoji: "🤝", type: "A", weight: 1 },
+      { text: "Pembangkang atau yang membawa energi baru", emoji: "🔥", type: "B", weight: 1 },
+      { text: "Penyeimbang yang menjaga harmoni", emoji: "☮️", type: "O", weight: 1 },
+      { text: "Pemikir yang sering mengkritisi dengan konstruktif", emoji: "🧠", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 3,
+    question: "Preferensi sosial saya adalah:",
+    answers: [
+      { text: "Gathering kecil dengan orang yang sudah dikenal", emoji: "☕", type: "A", weight: 1 },
+      { text: "Pesta besar dengan orang-orang baru", emoji: "🎉", type: "B", weight: 1 },
+      { text: "Event santai tanpa tekanan", emoji: "🏖️", type: "O", weight: 1 },
+      { text: "Diskusi kelompok dengan topik menarik", emoji: "🎓", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 3,
+    question: "Saat teman meminta nasihat, saya biasanya:",
+    answers: [
+      { text: "Memberi nasihat praktis berdasarkan pengalaman", emoji: "✔️", type: "A", weight: 1 },
+      { text: "Memberi inspirasi dan dukungan emosional", emoji: "💪", type: "B", weight: 1 },
+      { text: "Mendengarkan dan membantu mereka menemukan jalan sendiri", emoji: "🧭", type: "O", weight: 1 },
+      { text: "Menganalisis situasi dan memberikan perspektif komprehensif", emoji: "🔬", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 3,
+    question: "Komitmen sosial saya terhadap orang lain adalah:",
+    answers: [
+      { text: "Serius dan berkomitmen penuh terhadap kesuksesan mereka", emoji: "🎯", type: "A", weight: 1 },
+      { text: "Antusias tapi bisa berubah sesuai kebutuhan saat itu", emoji: "🌟", type: "B", weight: 1 },
+      { text: "Selaras dengan kondisi dan keseimbangan hidup", emoji: "🔄", type: "O", weight: 1 },
+      { text: "Selektif, fokus pada hubungan yang meaningful", emoji: "💎", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 3,
+    question: "Kemampuan saya berempati adalah:",
+    answers: [
+      { text: "Praktis, coba memecahkan masalah orang lain", emoji: "🔧", type: "A", weight: 1 },
+      { text: "Intuitif, langsung merasa apa yang orang rasakan", emoji: "❤️", type: "B", weight: 1 },
+      { text: "Alami, seimbang antara rasa dan logika", emoji: "🤝", type: "O", weight: 1 },
+      { text: "Kompleks, memahami lapis emosi yang dalam", emoji: "🎭", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 3,
+    question: "Saat ada teman yang sedih, respon saya adalah:",
+    answers: [
+      { text: "Menawarkan solusi praktis untuk memperbaiki situasi", emoji: "💡", type: "A", weight: 1 },
+      { text: "Menghibur dengan cara yang membuat mereka tersenyum", emoji: "😊", type: "B", weight: 1 },
+      { text: "Sekadar menemani mereka dalam kesunyian", emoji: "🤲", type: "O", weight: 1 },
+      { text: "Mendengarkan dengan pemahaman mendalam atas perasaan mereka", emoji: "👁️", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 3,
+    question: "Dalam mencari partner romantis, saya mencari:",
+    answers: [
+      { text: "Seseorang yang stabil, reliable, dan punya visi sama", emoji: "💑", type: "A", weight: 1 },
+      { text: "Seseorang yang exciting dan membuat hidup lebih berwarna", emoji: "✨", type: "B", weight: 1 },
+      { text: "Seseorang yang easygoing dan bisa tumbuh bersama", emoji: "🌿", type: "O", weight: 1 },
+      { text: "Seseorang yang bisa dipahami secara mendalam", emoji: "🔮", type: "AB", weight: 1 }
+    ]
+  },
+  // Paket 4: Ambisi, Karier, dan Etika Kerja (Q31-40)
+  {
+    package: 4,
+    question: "Tujuan karier saya adalah:",
+    answers: [
+      { text: "Mencapai posisi stabil dengan pertumbuhan terukur", emoji: "📈", type: "A", weight: 1 },
+      { text: "Mencapai puncak dengan cara paling inovatif", emoji: "🚀", type: "B", weight: 1 },
+      { text: "Bekerja dengan impact praktis dan kepuasan personal", emoji: "🎯", type: "O", weight: 1 },
+      { text: "Berkontribusi pada sesuatu yang bermakna dan substansial", emoji: "🌍", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 4,
+    question: "Dalam lingkungan kerja, saya paling produktif ketika:",
+    answers: [
+      { text: "Ada kejelasan peran, tugas, dan ekspektasi", emoji: "📋", type: "A", weight: 1 },
+      { text: "Ada kebebasan untuk kreativitas dan eksperimen", emoji: "🎨", type: "B", weight: 1 },
+      { text: "Ada kolaborasi dan hubungan baik dengan tim", emoji: "🤝", type: "O", weight: 1 },
+      { text: "Ada waktu untuk analisis mendalam dan refleksi", emoji: "🧠", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 4,
+    question: "Saat menghadapi kompetisi di tempat kerja, saya:",
+    answers: [
+      { text: "Fokus menjadi yang terbaik dengan kerja keras", emoji: "💪", type: "A", weight: 1 },
+      { text: "Melihatnya sebagai peluang untuk shine", emoji: "⭐", type: "B", weight: 1 },
+      { text: "Berusaha win-win dengan kolaborasi", emoji: "🤜🤛", type: "O", weight: 1 },
+      { text: "Mempertanyakan nilai kompetisi itu sendiri", emoji: "🤔", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 4,
+    question: "Nilai terpenting dalam bekerja bagi saya adalah:",
+    answers: [
+      { text: "Hasil yang terukur dan pengakuan atas pencapaian", emoji: "🏅", type: "A", weight: 1 },
+      { text: "Kebebasan dan tantangan untuk berkembang", emoji: "🦅", type: "B", weight: 1 },
+      { text: "Keseimbangan hidup kerja dan hubungan baik", emoji: "⚖️", type: "O", weight: 1 },
+      { text: "Integritas dan kontribusi pada misi yang bermakna", emoji: "💎", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 4,
+    question: "Pendekatan saya terhadap masalah kerja adalah:",
+    answers: [
+      { text: "Cari solusi berdasarkan precedent dan best practice", emoji: "📚", type: "A", weight: 1 },
+      { text: "Cari cara baru dan belum pernah dicoba sebelumnya", emoji: "💡", type: "B", weight: 1 },
+      { text: "Lihat konteks dan cari pendekatan paling praktis", emoji: "🎯", type: "O", weight: 1 },
+      { text: "Analisis sistemik dan pertimbangkan semua faktor", emoji: "🔬", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 4,
+    question: "Ketika harus membuat keputusan etis sulit di pekerjaan, saya:",
+    answers: [
+      { text: "Mengikuti aturan dan policy yang berlaku", emoji: "⚖️", type: "A", weight: 1 },
+      { text: "Mempertimbangkan dampak jangka panjang untuk semua", emoji: "🌳", type: "B", weight: 1 },
+      { text: "Mencari jalan tengah yang adil bagi semua pihak", emoji: "🕊️", type: "O", weight: 1 },
+      { text: "Berdiam dengan nilai dan prinsip personal saya", emoji: "🏛️", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 4,
+    question: "Gaya kepemimpinan saya (jika ada posisi memimpin):",
+    answers: [
+      { text: "Direktif dan terstruktur, memberikan arahan jelas", emoji: "🎖️", type: "A", weight: 1 },
+      { text: "Inspiratif dan delegatif, memberikan kebebasan", emoji: "🔥", type: "B", weight: 1 },
+      { text: "Kolaboratif dan pendengar, melibatkan semua", emoji: "👥", type: "O", weight: 1 },
+      { text: "Visioner dan strategis, fokus pada tujuan jangka panjang", emoji: "🗺️", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 4,
+    question: "Hubungan saya dengan kesalahan di pekerjaan adalah:",
+    answers: [
+      { text: "Harus diminimalkan dan dicegah dengan prosedur ketat", emoji: "✅", type: "A", weight: 1 },
+      { text: "Pembelajaran berharga untuk inovasi lebih baik", emoji: "📖", type: "B", weight: 1 },
+      { text: "Bagian dari proses yang bisa diperbaiki dengan terbuka", emoji: "🔄", type: "O", weight: 1 },
+      { text: "Kesempatan untuk menganalisis dan memperdalam pemahaman", emoji: "🔍", type: "AB", weight: 1 }
+    ]
+  },
+  // Paket 5: Nilai Diri dan Refleksi Eksistensial (Q41-50)
+  {
+    package: 5,
+    question: "Makna hidup bagi saya terletak pada:",
+    answers: [
+      { text: "Mencapai tujuan konkret dan membangun warisan stabil", emoji: "🏛️", type: "A", weight: 1 },
+      { text: "Petualangan, pengalaman, dan ekspresi diri autentik", emoji: "🌟", type: "B", weight: 1 },
+      { text: "Kebahagiaan, hubungan bermakna, dan kontribusi praktis", emoji: "😊", type: "O", weight: 1 },
+      { text: "Pemahaman, pertumbuhan spiritual, dan pencerahan", emoji: "🧘", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 5,
+    question: "Pandangan saya tentang perubahan hidup adalah:",
+    answers: [
+      { text: "Harus direncanakan dan dikelola dengan hati-hati", emoji: "📌", type: "A", weight: 1 },
+      { text: "Kesempatan untuk eksplorasi hal baru dan berbeda", emoji: "🎪", type: "B", weight: 1 },
+      { text: "Bagian natural dari hidup yang bisa diadaptasi", emoji: "🌊", type: "O", weight: 1 },
+      { text: "Proses transformasi yang memberikan pembelajaran", emoji: "🦋", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 5,
+    question: "Nilai-nilai yang paling penting bagi saya adalah:",
+    answers: [
+      { text: "Kejujuran, tanggung jawab, dan dedikasi", emoji: "🎖️", type: "A", weight: 1 },
+      { text: "Kebebasan, kreativitas, dan autentisitas", emoji: "🦅", type: "B", weight: 1 },
+      { text: "Keseimbangan, harmoni, dan kebijaksanaan praktis", emoji: "☮️", type: "O", weight: 1 },
+      { text: "Kebenaran, pertumbuhan, dan transformasi", emoji: "💫", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 5,
+    question: "Saat menghadapi ketidakpastian hidup, saya:",
+    answers: [
+      { text: "Buat rencana darurat dan persiapkan diri matang", emoji: "🛡️", type: "A", weight: 1 },
+      { text: "Nikmati tantangan dan percaya bisa handle apapun", emoji: "😎", type: "B", weight: 1 },
+      { text: "Biarkan mengalir dan percaya pada proses", emoji: "🌊", type: "O", weight: 1 },
+      { text: "Refleksikan dan cari makna di balik situasi", emoji: "🔮", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 5,
+    question: "Hubungan saya dengan kematian / akhir hayat adalah:",
+    answers: [
+      { text: "Sesuatu yang disiapkan dengan rencana matang", emoji: "📝", type: "A", weight: 1 },
+      { text: "Sesuatu yang tidak perlu dipikirkan sekarang", emoji: "⏰", type: "B", weight: 1 },
+      { text: "Bagian alami dari siklus hidup yang diterima", emoji: "🍂", type: "O", weight: 1 },
+      { text: "Motivasi untuk hidup dengan purpose dan meaning", emoji: "🌅", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 5,
+    question: "Saat merasa hilang atau tidak tahu arah, saya:",
+    answers: [
+      { text: "Kembali ke nilai dasar dan struktur yang tepercaya", emoji: "🧭", type: "A", weight: 1 },
+      { text: "Coba perspektif baru dan cari petualangan baru", emoji: "🗺️", type: "B", weight: 1 },
+      { text: "Berbagi dengan orang terdekat dan cari keseimbangan", emoji: "🤝", type: "O", weight: 1 },
+      { text: "Refleksi mendalam tentang siapa diri saya sebenarnya", emoji: "🔍", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 5,
+    question: "Legacy yang ingin saya tinggalkan adalah:",
+    answers: [
+      { text: "Kontribusi konkret yang bermanfaat jangka panjang", emoji: "🏗️", type: "A", weight: 1 },
+      { text: "Inspirasi dan teladan untuk hidup bebas authentic", emoji: "🔥", type: "B", weight: 1 },
+      { text: "Hubungan bermakna dan dampak positif pada orang lain", emoji: "💝", type: "O", weight: 1 },
+      { text: "Pemikiran yang mendorong evolusi dan transformasi", emoji: "🌱", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 5,
+    question: "Prioritas utama dalam memilih jalur hidup adalah:",
+    answers: [
+      { text: "Keamanan finansial dan stabilitas jangka panjang", emoji: "💰", type: "A", weight: 1 },
+      { text: "Kebahagiaan pribadi dan kebebasan memilih", emoji: "🎯", type: "B", weight: 1 },
+      { text: "Keseimbangan antara ambisi dan kehidupan pribadi", emoji: "⚖️", type: "O", weight: 1 },
+      { text: "Alignment dengan nilai-nilai spiritual dan filosofis", emoji: "✨", type: "AB", weight: 1 }
+    ]
+  },
+  {
+    package: 5,
+    question: "Pertumbuhan pribadi bagi saya adalah:",
+    answers: [
+      { text: "Meningkatkan skill dan mencapai milestone terukur", emoji: "📊", type: "A", weight: 1 },
+      { text: "Mencoba hal baru dan menemukan versi diri lebih baik", emoji: "🌟", type: "B", weight: 1 },
+      { text: "Belajar dari pengalaman dan menjadi pribadi lebih bijak", emoji: "🎓", type: "O", weight: 1 },
+      { text: "Pemahaman mendalam tentang tujuan hidup dan esensi diri", emoji: "🧠", type: "AB", weight: 1 }
+    ]
+  }
+];
+
+// Personality type descriptions
+const typeDescriptions = {
+  A: {
+    title: "Tipe A - Si Organizer Strategis",
+    emoji: "🎯",
+    bg: "rgba(0, 200, 255, 0.1)",
+    border: "rgba(0, 200, 255, 0.3)",
+    description: "Anda adalah orang yang terstruktur, metodis, dan berorientasi pada tujuan. Anda memiliki dedikasi tinggi terhadap rencana yang telah dibuat dan loyalitas yang kuat terhadap nilai-nilai yang dianut. Anda cenderung bertanggung jawab, dapat diandalkan, dan selalu mencari cara untuk meningkatkan efisiensi. Kekuatan utama Anda adalah kemampuan mengorganisir dan membuat sistem yang bekerja dengan sempurna.",
+    strength: "Terstruktur, Loyal, Bertanggung Jawab",
+    challenge: "Terlalu kaku, Kesulitan beradaptasi",
+    advice: "Cobalah untuk lebih fleksibel dan terbuka terhadap perubahan. Ingat bahwa kadang-kadang rencana perlu disesuaikan."
+  },
+  B: {
+    title: "Tipe B - Si Pemimpin Energik",
+    emoji: "⚡",
+    bg: "rgba(255, 100, 0, 0.1)",
+    border: "rgba(255, 100, 0, 0.3)",
+    description: "Anda adalah orang yang penuh energi, spontan, dan optimis. Anda menyukai tantangan baru dan tidak takut mengambil risiko. Kepribadian Anda adalah kombinasi dari karisma yang kuat dan kemampuan untuk menginspirasi orang lain. Anda cenderung aktif, impulsif, dan selalu mencari pengalaman baru yang menarik. Kekuatan utama Anda adalah fleksibilitas dan kemampuan beradaptasi dengan cepat.",
+    strength: "Energik, Inovatif, Adaptif",
+    challenge: "Impulsif, Kurang perhatian detail",
+    advice: "Manfaatkan energi Anda tetapi jangan lupa untuk merencanakan. Keseimbangan antara spontanitas dan perencanaan akan membuat Anda lebih efektif."
+  },
+  O: {
+    title: "Tipe O - Si Negosiator Fleksibel",
+    emoji: "🌊",
+    bg: "rgba(255, 0, 100, 0.1)",
+    border: "rgba(255, 0, 100, 0.3)",
+    description: "Anda adalah orang yang mudah bergaul, fleksibel, dan menyenangkan. Anda memiliki kemampuan alami untuk memahami perspektif orang lain dan menciptakan harmoni dalam kelompok. Kepribadian Anda ditandai dengan keseimbangan antara spontanitas dan pertimbangan matang. Anda cenderung realistis, praktis, dan fokus pada hal-hal yang benar-benar penting. Kekuatan utama Anda adalah kemampuan bernegosiasi dan menciptakan solusi win-win.",
+    strength: "Fleksibel, Harmonis, Realistis",
+    challenge: "Kurang tegas, Cenderung menunda",
+    advice: "Perkuat kemampuan mengambil keputusan tegas. Jangan terlalu banyak berkompromi hingga melupakan prioritas Anda."
+  },
+  AB: {
+    title: "Tipe AB - Si Pemikir Strategis",
+    emoji: "🧠",
+    bg: "rgba(168, 85, 247, 0.1)",
+    border: "rgba(168, 85, 247, 0.3)",
+    description: "Anda adalah orang yang kompleks, introspektif, dan analitis. Anda memiliki kemampuan untuk melihat gambaran besar dan memahami nuansa dalam setiap situasi. Kepribadian Anda ditandai dengan pemikiran kritis yang tajam dan keinginan untuk memahami esensi dari segala sesuatu. Anda cenderung idealis, ambisius, dan selalu mencari cara untuk berkontribusi secara bermakna. Kekuatan utama Anda adalah kemampuan berpikir strategis dan visi jangka panjang yang jelas.",
+    strength: "Analitis, Visioner, Idealis",
+    challenge: "Perfeksionis, Overthinking",
+    advice: "Terima bahwa kesempurnaan tidak selalu mungkin. Belajar untuk mengambil keputusan cepat dengan informasi yang cukup bagi sekarang."
+  }
+};
+
+// Application state
+let currentQuestion = 0;
+let answers = {};
+let scores = { A: 0, B: 0, O: 0, AB: 0 };
+let currentScreen = 'intro'; // intro, test, results
+
+// Initialize SDK and Data
+async function initializeApp() {
+  const handler = {
+    onDataChanged(data) {
+      // Update UI if needed
+    }
+  };
+
+  const result = await window.dataSdk.init(handler);
+  if (!result.isOk) {
+    console.error("Data SDK initialization failed");
+  }
+
+  // Element SDK setup
+  const defaultConfig = {
+    dashboard_title: 'KETSUEKI-GATA PERSONALITY TEST',
+    subject_name: 'PSYCHOLOGICAL ANALYSIS',
+    mbti_type: 'INTRJ',
+    background_color: '#0a0a0f',
+    surface_color: '#12121a',
+    text_color: '#e0e0f0',
+    primary_color: '#00f0ff',
+    secondary_color: '#a855f7',
+    font_family: 'Rajdhani',
+    font_size: 16
+  };
+
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => { applyConfig(config); },
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+        { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+        { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+        { get: () => config.primary_color || defaultConfig.primary_color, set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); } },
+        { get: () => config.secondary_color || defaultConfig.secondary_color, set: (v) => { config.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); } }
+      ],
+      borderables: [],
+      fontEditable: {
+        get: () => config.font_family || defaultConfig.font_family,
+        set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+      },
+      fontSizeable: {
+        get: () => config.font_size || defaultConfig.font_size,
+        set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+      }
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ['dashboard_title', config.dashboard_title || defaultConfig.dashboard_title],
+      ['subject_name', config.subject_name || defaultConfig.subject_name],
+      ['mbti_type', config.mbti_type || defaultConfig.mbti_type]
+    ])
+  });
+
+  renderIntro();
+}
+
+function applyConfig(config) {
+  document.documentElement.style.setProperty('--bg-dark', config.background_color);
+  document.documentElement.style.setProperty('--surface', config.surface_color);
+  document.documentElement.style.setProperty('--text-col', config.text_color);
+  document.documentElement.style.setProperty('--cyan', config.primary_color);
+  document.documentElement.style.setProperty('--violet', config.secondary_color);
+  document.body.style.background = config.background_color;
+  document.body.style.color = config.text_color;
+}
+
+function renderIntro() {
+  const main = document.getElementById('mainContent');
+  main.innerHTML = `
+    <div class="test-container flex items-center justify-center">
+      <div class="intro-content max-w-3xl">
+        <h1 class="intro-title">KETSUEKI-GATA PERSONALITY TEST</h1>
+        <p class="intro-subtitle">Temukan Tipe Kepribadian Anda Berdasarkan Teori Golongan Darah</p>
+        <p class="intro-description">
+          Tes kepribadian berbasis Ketsueki-gata (血液型) adalah metode analisis yang berasal dari Jepang 
+          yang menghubungkan golongan darah dengan kepribadian. Tes ini terdiri dari 50 pertanyaan yang dirancang 
+          untuk mengidentifikasi pola kepribadian Anda melalui 5 paket analisis mendalam.
+        </p>
+        <div class="packages-grid">
+          <div class="package-item">📋 Perilaku Sehari-hari</div>
+          <div class="package-item">🎭 Manajemen Emosi</div>
+          <div class="package-item">👥 Dinamika Sosial</div>
+          <div class="package-item">💼 Karier & Etika</div>
+          <div class="package-item">✨ Nilai Eksistensial</div>
+        </div>
+        <div class="button-group">
+          <button class="btn btn-primary" onclick="startTest()">Mulai Tes Sekarang</button>
+          <button class="btn btn-secondary" onclick="loadPreviousResults()">Lihat Hasil Sebelumnya</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function startTest() {
+  currentScreen = 'test';
+  currentQuestion = 0;
+  answers = {};
+  scores = { A: 0, B: 0, O: 0, AB: 0 };
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (currentQuestion >= testQuestions.length) {
+    calculateResults();
+    return;
+  }
+
+  const q = testQuestions[currentQuestion];
+  const progress = ((currentQuestion) / testQuestions.length) * 100;
+
+  const main = document.getElementById('mainContent');
+  main.innerHTML = `
+    <div class="test-container">
+      <div class="progress-bar" style="margin-bottom: 30px;">
+        <div class="progress-fill" style="width: ${progress}%"></div>
+      </div>
+      <p class="progress-text">PERTANYAAN ${currentQuestion + 1} DARI ${testQuestions.length} • PAKET ${q.package}</p>
+      <div class="question-card" style="max-width: 900px; margin: 0 auto;">
+        <h2 class="question-text">${q.question}</h2>
+        <div class="answers-grid">
+          ${q.answers.map((ans, idx) => `
+            <div class="answer-card" onclick="selectAnswer(${idx})">
+              <span class="answer-emoji">${ans.emoji}</span>
+              <p class="answer-text">${ans.text}</p>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()" disabled>LANJUT KE PERTANYAAN BERIKUTNYA</button>
+      </div>
+    </div>
+  `;
+}
+
+function selectAnswer(idx) {
+  const q = testQuestions[currentQuestion];
+  const ans = q.answers[idx];
+
+  // Update scores
+  scores[ans.type] += ans.weight;
+  answers[currentQuestion] = idx;
+
+  // Visual feedback
+  document.querySelectorAll('.answer-card').forEach(card => card.classList.remove('selected'));
+  document.querySelectorAll('.answer-card')[idx].classList.add('selected');
+
+  // Enable next button
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.classList.add('active');
+  nextBtn.disabled = false;
+
+  // Auto-advance after 600ms
+  setTimeout(() => nextQuestion(), 600);
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  renderQuestion();
+}
+
+function calculateResults() {
+  // Determine dominant type
+  let dominantType = 'A';
+  let maxScore = scores.A;
+
+  for (let type of ['B', 'O', 'AB']) {
+    if (scores[type] > maxScore) {
+      maxScore = scores[type];
+      dominantType = type;
+    }
+  }
+
+  currentScreen = 'results';
+  renderResults(dominantType);
+}
+
+function renderResults(dominantType) {
+  const typeDesc = typeDescriptions[dominantType];
+  const main = document.getElementById('mainContent');
+
+  // Normalize scores for display
+  const total = scores.A + scores.B + scores.O + scores.AB;
+  const percentages = {
+    A: Math.round((scores.A / total) * 100),
+    B: Math.round((scores.B / total) * 100),
+    O: Math.round((scores.O / total) * 100),
+    AB: Math.round((scores.AB / total) * 100)
+  };
+
+  main.innerHTML = `
+    <div class="results-container">
+      <div class="results-card">
+        <div class="result-badge" style="background: ${typeDesc.bg}; border-color: var(--cyan);">
+          ${typeDesc.emoji}
+        </div>
+        <h1 class="result-title">${typeDesc.title}</h1>
+        <p class="result-description">${typeDesc.description}</p>
+
+        <div class="scores-container">
+          <div class="score-item">
+            <span class="score-label">Tipe A</span>
+            <div class="score-bar">
+              <div class="score-fill" style="width: ${percentages.A}%; background: linear-gradient(90deg, #00a8ff, #00f0ff);"></div>
+            </div>
+            <span class="score-value">${percentages.A}%</span>
+          </div>
+          <div class="score-item">
+            <span class="score-label">Tipe B</span>
+            <div class="score-bar">
+              <div class="score-fill" style="width: ${percentages.B}%; background: linear-gradient(90deg, #ff6400, #ff9900);"></div>
+            </div>
+            <span class="score-value">${percentages.B}%</span>
+          </div>
+          <div class="score-item">
+            <span class="score-label">Tipe O</span>
+            <div class="score-bar">
+              <div class="score-fill" style="width: ${percentages.O}%; background: linear-gradient(90deg, #ff0064, #ff3399);"></div>
+            </div>
+            <span class="score-value">${percentages.O}%</span>
+          </div>
+          <div class="score-item">
+            <span class="score-label">Tipe AB</span>
+            <div class="score-bar">
+              <div class="score-fill" style="width: ${percentages.AB}%; background: linear-gradient(90deg, #a855f7, #d946ef);"></div>
+            </div>
+            <span class="score-value">${percentages.AB}%</span>
+          </div>
+        </div>
+
+        <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+          <p style="font-size: 12px; color: #888; margin-bottom: 8px; font-family: 'Orbitron', monospace;">KEKUATAN</p>
+          <p style="color: var(--cyan); font-weight: 600; font-size: 14px; margin-bottom: 12px;">${typeDesc.strength}</p>
+          <p style="font-size: 12px; color: #888; margin-bottom: 8px; font-family: 'Orbitron', monospace;">TANTANGAN</p>
+          <p style="color: var(--violet); font-weight: 600; font-size: 14px; margin-bottom: 12px;">${typeDesc.challenge}</p>
+          <p style="font-size: 12px; color: #888; margin-bottom: 8px; font-family: 'Orbitron', monospace;">SARAN PENGEMBANGAN</p>
+          <p style="color: #b0b0c0; font-size: 14px;">${typeDesc.advice}</p>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-primary" onclick="saveResult('${dominantType}')">Simpan Hasil</button>
+          <button class="btn btn-secondary" onclick="renderIntro()">Ulangi Tes</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveResult(dominantType) {
+  const now = new Date();
+  const total = scores.A + scores.B + scores.O + scores.AB;
+
+  const result = await window.dataSdk.create({
+    test_id: 'test_' + Date.now(),
+    name: dominantType,
+    completed_date: now.toISOString(),
+    type_a: Math.round((scores.A / total) * 100),
+    type_b: Math.round((scores.B / total) * 100),
+    type_o: Math.round((scores.O / total) * 100),
+    type_ab: Math.round((scores.AB / total) * 100),
+    dominant_type: dominantType,
+    result_text: typeDescriptions[dominantType].description
+  });
+
+  if (result.isOk) {
+    alert('Hasil tes berhasil disimpan ke Canva Sheet Anda!');
+  } else {
+    console.error('Save failed', result.error);
+  }
+}
+
+function loadPreviousResults() {
+  // This would load from Data SDK in a full implementation
+  alert('Fitur ini menampilkan hasil tes Anda yang sebelumnya dari Canva Sheet.');
+}
+
+// Initialize particles and app
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const isCyan = Math.random() > 0.5;
+    p.style.background = isCyan ? 'var(--cyan)' : 'var(--violet)';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = Math.random() * 100 + '%';
+    p.style.opacity = (Math.random() * 0.3 + 0.1).toString();
+    p.style.animation = `particleDrift ${8 + Math.random() * 12}s ease-in-out infinite`;
+    p.style.animationDelay = `-${Math.random() * 10}s`;
+    container.appendChild(p);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  createParticles();
+  initializeApp();
+  lucide.createIcons();
+});
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dcc7680e65dfdf4',t:'MTc3MzU4NzYxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
